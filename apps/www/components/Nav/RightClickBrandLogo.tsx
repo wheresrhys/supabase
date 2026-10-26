@@ -27,6 +27,7 @@ const RightClickBrandLogo = () => {
   const router = useRouter()
   const [open, setOpen] = useState<boolean>(false)
   const [copiedLabel, setCopiedLabel] = useState<string | null>(null)
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [logoHighlight, setLogoHighlight] = useState<MenuItemProps['logoHighlight']>()
   const { resolvedTheme } = useTheme()
 
@@ -94,7 +95,9 @@ const RightClickBrandLogo = () => {
       }),
       () => {
         setCopiedLabel(menuItem.label)
-        setTimeout(() => {
+        // an older timer would clear the newer feedback early
+        clearTimeout(copiedTimeoutRef.current)
+        copiedTimeoutRef.current = setTimeout(() => {
           setCopiedLabel(null)
         }, 2000)
       }
@@ -154,7 +157,7 @@ const RightClickBrandLogo = () => {
                   asChild
                   key={menuItem.label}
                   onPointerEnter={() => handleItemPointerEnter(menuItem)}
-                  className="w-full flex justify-between gap-2 items-center p-2!"
+                  className="w-full flex justify-between gap-2 items-center p-2! cursor-pointer"
                 >
                   {menuItem.type === 'download' || menuItem.type === 'link' ? (
                     <Link
@@ -182,6 +185,9 @@ const RightClickBrandLogo = () => {
           </Fragment>
         ))}
       </DropdownMenuContent>
+      <span className="sr-only" role="status">
+        {copiedLabel ? 'Copied to clipboard' : ''}
+      </span>
     </DropdownMenu>
   )
 }
